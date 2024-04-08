@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, os::linux::net, time};
 
 use clap::*;
 use colored::Colorize;
@@ -10,7 +10,7 @@ const TASKS_JSON_PATH: &str = "./src/tasks.json";
 struct Task {
     name: String,
     description: String,
-    due: i32
+    due: String
 }
 
 fn main() {
@@ -32,6 +32,14 @@ fn main() {
                         .required(false)
                         .short('d')
                         .long("description")
+                )
+                .arg(
+                    Arg::new("due")
+                        .help("set a due date for a task")
+                        .short('u')
+                        .long("due")
+                        .required(false)
+                    
                 )
             )
         .subcommand(
@@ -58,6 +66,18 @@ fn main() {
                 .get_one::<String>("task");
             let desc = submatches
                 .get_one::<String>("description");
+            let due = submatches
+                .get_one::<String>("due");
+            
+            // let due_epoch = time::SystemTime::now()
+            //     .duration_since(time::UNIX_EPOCH)
+            //     .expect("time went backward");
+
+            if due.is_some() {
+                //TODO: convert date string to unix
+            }
+
+            // let due_string = format!("{}:{}", due_epoch.as_secs() * 60, due_epoch.as_secs()); 
 
             if name.is_none() {
                 println!("{} a task name was not supplied", "!!".red().bold());
@@ -73,7 +93,7 @@ fn main() {
             if let Some(task) = tasks.iter().find(|&task| &task.name == name) {
                 println!("{} task '{}' already exists", "!!".red().bold(), task.name);
             } else {
-                let mut new_task: Task = Task { name: name.to_string(), description: String::from(""), due: 0};
+                let mut new_task: Task = Task { name: name.to_string(), description: String::from(""), due: String::from("value")};
 
                 print!("{}", "+ ".green().bold());
                 println!("{}", name.yellow().bold());
@@ -84,6 +104,10 @@ fn main() {
                     println!("  {}", desc.unwrap().bright_black().italic());
                 }
 
+                new_task.due = due.unwrap().to_string();
+                print!("{}", "+ ".green().bold());
+                println!("  {}", due.unwrap().bright_blue().italic());
+                
                 tasks.push(new_task);
                 write_tasks(tasks);
             }
@@ -127,6 +151,9 @@ fn main() {
                 println!("{}. {}", idx.to_string().blue(), task.name.yellow().bold());
                 if !task.description.is_empty() {
                     println!("     {}", task.description.italic().bright_black());
+                }
+                if !task.due.is_empty() {
+                    println!("     {}", task.due.italic().bright_blue());
                 }
             }
         }

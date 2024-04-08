@@ -1,32 +1,12 @@
 [
   {
-    "name": "Fard",
-    "description": "every day is a good time to fard.",
-    "due": 1002
+    "name": "Washing",
+    "description": "Do it before you forget, there is alot to do!",
+    "due": "today"
   },
   {
-    "name": "Fard",
-    "description": "every day is a good time to fard.",
-    "due": 1002
-  },
-  {
-    "name": "poo the bum",
-    "description": "dont forget to do yor number 2 or you will poo in doo doo",
-    "due": 1002
-  },
-  {
-    "name": "d",
-    "description": "sdf",
-    "due": 1002
-  },
-  {
-    "name": "jong",
-    "description": "",
-    "due": 1002
-  },
-  {
-    "name": "HELL",
-    "description": "",
-    "due": 1002
+    "name": "Homework",
+    "description": "This is really important, there is a big test coming up!",
+    "due": "next week"
   }
 ]
