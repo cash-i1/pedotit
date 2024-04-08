@@ -10,6 +10,7 @@ const TASKS_JSON_PATH: &str = "./src/tasks.json";
 struct Task {
     name: String,
     description: String,
+    due: i32
 }
 
 fn main() {
@@ -72,7 +73,7 @@ fn main() {
             if let Some(task) = tasks.iter().find(|&task| &task.name == name) {
                 println!("{} task '{}' already exists", "!!".red().bold(), task.name);
             } else {
-                let mut new_task: Task = Task { name: name.to_string(), description: String::from("") };
+                let mut new_task: Task = Task { name: name.to_string(), description: String::from(""), due: 0};
 
                 print!("{}", "+ ".green().bold());
                 println!("{}", name.yellow().bold());
@@ -116,6 +117,11 @@ fn main() {
         }
         Some(("list", submatches)) => {
             let tasks = load_tasks();
+
+            if tasks.is_empty() {
+                println!("{} there isnt any tasks to list", "!!".red().bold());
+                return;
+            }
 
             for (idx, task) in tasks.iter().enumerate() {
                 println!("{}. {}", idx.to_string().blue(), task.name.yellow().bold());
