@@ -28,6 +28,7 @@ fn main() {
                     Arg::new("description")
                         .help("the description of the task")
                         .requires("task")
+                        .required(false)
                         .short('d')
                         .long("description")
                 )
@@ -42,6 +43,10 @@ fn main() {
 
                 )
         )
+        .subcommand(
+            Command::new("list")
+                .about("list all of the tasks")
+        )
             
         .get_matches();
     
@@ -49,20 +54,39 @@ fn main() {
     match matches.subcommand() {
         Some(("add", submatches)) => {
             let name = submatches
-                .get_one::<String>("task")
-                .expect("you need to parse in atask");
+                .get_one::<String>("task");
             let desc = submatches
-                .get_one::<String>("description")
-                .expect("was not parsed");
+                .get_one::<String>("description");
 
-            // println!("{}", "pedotit".cyan().italic().bold());
-            // println!("{}", "added:".green());
+            if name.is_none() {
+                println!("{} a task name was not supplied", "!!".red().bold());
+                return;
+            } else if name.unwrap().is_empty() {
+                println!("{} task name is invalid ('{}')", "!!".red().bold(), name.unwrap());
+                return;
+            }
 
-            print!("{}", "+ ".green().bold());
-            println!("{}", name.yellow().bold());
+            let name = name.unwrap();
+            let mut tasks = load_tasks();
 
-            print!("{}", "+ ".green().bold());
-            println!("  {}", desc.bright_black().italic());
+            if let Some(task) = tasks.iter().find(|&task| &task.name == name) {
+                println!("{} task '{}' already exists", "!!".red().bold(), task.name);
+            } else {
+                let mut new_task: Task = Task { name: name.to_string(), description: String::from("") };
+
+                print!("{}", "+ ".green().bold());
+                println!("{}", name.yellow().bold());
+                
+                if desc.is_some() {
+                    new_task.description = desc.unwrap().to_string();
+                    print!("{}", "+ ".green().bold());
+                    println!("  {}", desc.unwrap().bright_black().italic());
+                }
+
+                tasks.push(new_task);
+                write_tasks(tasks);
+            }
+
 
         }
 
@@ -71,12 +95,22 @@ fn main() {
                 .get_one::<String>("task")
                 .expect("you need to parse in atask");
 
-            let tasks = load_tasks();
+
+            let mut tasks = load_tasks();
 
             if let Some(task) = tasks.iter().find(|&task| &task.name == name) {
-                println!("{:?}", task.name);
+                print!("{}", "- ".red().bold());
+                println!("{}", name.yellow().bold());
+
+                print!("{}", "- ".red().bold());
+                println!("  {}", &task.description.bright_black().italic());
+
+                let task_idx = tasks.iter().position(|t| &t.name == name).unwrap();
+                tasks.remove(task_idx);
+                write_tasks(tasks);
+
             } else {
-                println!("{} task could not be found", "?".yellow().bold())
+                println!("{} task '{}' could not be found", "!!".red().bold(), name)
             }
 
         }
@@ -93,6 +127,6 @@ fn load_tasks() -> Vec<Task> {
 }
 
 fn write_tasks(tasks: Vec<Task>) {
-    let tasks: String = serde_json::to_string(&tasks).expect("msg");
+    let tasks: String = serde_json::to_string_pretty(&tasks).expect("msg");
     fs::write(TASKS_JSON_PATH, tasks);
 }
