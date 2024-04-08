@@ -13,10 +13,63 @@ fn main() {
                         .short('t')
                         .long("task")
                 )
+                .arg(
+                    Arg::new("description")
+                        .help("the description of the task")
+                        .requires("task")
+                        .short('d')
+                        .long("description")
+                )
             )
+        .subcommand(
+            Command::new("del")
+                .about("Remove a todo item")
+                .arg(
+                    Arg::new("task")
+                        .short('t')
+                        .long("task")
+
+                )
+        )
+            
         .get_matches();
     
     
-    let test = matches.subcommand_matches("add").unwrap();
-    println!("Adding task '{}' to the DB", test.get_one::<String>("task").unwrap())
+    match matches.subcommand() {
+        Some(("add", submatches)) => {
+            let name = submatches
+                .get_one::<String>("task")
+                .expect("you need to parse in atask");
+            let desc = submatches
+                .get_one::<String>("description")
+                .expect("was not parsed");
+
+            // println!("{}", "pedotit".cyan().italic().bold());
+            // println!("{}", "added:".green());
+
+            print!("{}", "+ ".green().bold());
+            println!("{}", name.yellow().bold());
+
+            print!("{}", "+ ".green().bold());
+            println!("  {}", desc.bright_black().italic());
+
+        }
+
+        Some(("del", submatches)) => {
+            let name = submatches
+                .get_one::<String>("task")
+                .expect("you need to parse in atask");
+
+            print!("{}", "- ".red().bold());
+            println!("{}", name.yellow().bold());
+
+            print!("{}", "- ".red().bold());
+            println!("  {}", "placeholder i dont have database".bright_black().italic());
+
+
+        }
+        _ => {
+            panic!("all arguments exhausted.")
+        }
+    }
 }
