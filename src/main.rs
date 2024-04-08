@@ -114,6 +114,16 @@ fn main() {
             }
 
         }
+        Some(("list", submatches)) => {
+            let tasks = load_tasks();
+
+            for (idx, task) in tasks.iter().enumerate() {
+                println!("{}. {}", idx.to_string().blue(), task.name.yellow().bold());
+                if !task.description.is_empty() {
+                    println!("     {}", task.description.italic().bright_black());
+                }
+            }
+        }
         _ => {
             panic!("all arguments exhausted.")
         }
