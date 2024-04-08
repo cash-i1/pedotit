@@ -1,5 +1,19 @@
+use std::fs;
+
 use clap::*;
 use colored::Colorize;
+use serde::*;
+
+#[derive(Serialize, Deserialize)]
+struct Task {
+    name: String,
+    description: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct Tasks {
+    tasks: Vec<Task>
+}
 
 fn main() {
     let matches = Command::new("pedotit")
@@ -60,11 +74,24 @@ fn main() {
                 .get_one::<String>("task")
                 .expect("you need to parse in atask");
 
-            print!("{}", "- ".red().bold());
-            println!("{}", name.yellow().bold());
 
-            print!("{}", "- ".red().bold());
-            println!("  {}", "placeholder i dont have database".bright_black().italic());
+            let tasks = load_json();
+
+            for task in tasks {
+                if &task.name == name {
+                    print!("{}", "- ".red().bold());
+                    println!("{}", name.yellow().bold());
+
+                    print!("{}", "- ".red().bold());
+                    println!("  {}", &task.description.bright_black().italic());
+                    return;
+                }
+            }
+
+            println!("{} task could not be found", "?".yellow().bold())
+
+
+
 
 
         }
@@ -72,4 +99,10 @@ fn main() {
             panic!("all arguments exhausted.")
         }
     }
+}
+
+fn load_json() -> Vec<Task> {
+    let s = fs::read_to_string("./src/tasks.json").expect("couldnt");
+    let tasks: Vec<Task> = serde_json::from_str(s.as_str()).expect("msg");
+    tasks
 }
